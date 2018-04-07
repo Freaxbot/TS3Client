@@ -1,0 +1,5 @@
+﻿  Crypto.cpp
+d:\users\johan\source\repos\tsclient-l\tsclient-l\crypto.cpp(28): warning C4309: "Argument": Verkürzung eines konstanten Wertes
+d:\users\johan\source\repos\tsclient-l\tsclient-l\crypto.cpp(54): warning C4309: "Argument": Verkürzung eines konstanten Wertes
+d:\users\johan\source\repos\tsclient-l\tsclient-l\crypto.cpp(70): warning C4309: "Argument": Verkürzung eines konstanten Wertes
+LINK : fatal error LNK1104: Datei "D:\Users\Johannes Waigel\Desktop\lib-c++\libtomcrypt\MSVC_x64_Debug\tomcryptd.lib" kann nicht geöffnet werden.
