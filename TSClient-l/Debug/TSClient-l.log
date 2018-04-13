@@ -1,6 +1,0 @@
-﻿  Util.cpp
-d:\users\johan\source\repos\tsclient-l\tsclient-l\util.cpp(10): warning C4244: "Initialisierung": Konvertierung von "double" in "int", möglicher Datenverlust
-d:\users\johan\source\repos\tsclient-l\tsclient-l\util.cpp(20): warning C4244: "return": Konvertierung von "time_t" in "int", möglicher Datenverlust
-  Packet.cpp
-  Code wird generiert...
-  TSClient-l.vcxproj -> D:\Users\johan\source\repos\TSClient-l\Debug\TSClient-l.exe
