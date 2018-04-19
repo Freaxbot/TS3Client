@@ -33,10 +33,12 @@ std::vector<unsigned char> BuildHeader(char packettype)
 void GetPacket(char* data, int lengh)
 {
     std::string  type = getByte(data, 11, lengh);
-
-    if (type == "88") {
+    
+    if (type == "88") 
+    {
         std::cout << "Package INIT1" << std::endl;
         InitProcess(data);
     }
+    
 
 }

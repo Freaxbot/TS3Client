@@ -12,7 +12,7 @@ CXXSOURCES = client.cc PacketHandler.cc crypto.cc Packet.cc Util.cc header/clien
 CXXREMOVE = client.o crypto.o Packet.o PacketHandler.o Util.o 
 CXXOBJECTS = $(CXXSOURCES:.cc=.o)  # expands to list of object files
 CXXFLAGS = -DESRI_UNIX $(INCLUDEDIRS) -DUSE_LTM -DLTM_DESC
-CXX = g++
+CXX = g++ -g
 
 LDFLAGS = $(LIBDIRS) $(LIBS)
 

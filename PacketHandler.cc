@@ -71,7 +71,6 @@ void FetchData()
     {
         memset(buf,'\0', BUFLEN);
         recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, reinterpret_cast<socklen_t *>(&slen));
-
         std::cout << "[IN] :: "<< byte_2_str_c(reinterpret_cast<char*>(buf), sizeof(buf)) << std::endl;
         GetPacket(buf, sizeof(buf));
     }
