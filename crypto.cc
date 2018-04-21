@@ -20,6 +20,7 @@ void IncommingPacket(char* data)
 
 }
 
+std::string GenerateOmega();
 
 // ========== TS3INIT ==========
 void StartingInitProcess()
@@ -103,14 +104,51 @@ void InitProcess(char * byte)
             init1.push_back(byte[i + 12 + 64 + 64]);
 
   
-     std::cout << getByte(byte, 250, 32) << std::endl;
-
+        std::cout << getByte(byte, 250, 32) << std::endl;
+       std::string OmegaString = GenerateOmega();
 
         std::cout << "CODE :: "<< byte_2_str_c(reinterpret_cast<char*>(init1.data()), sizeof(init1)) << std::endl;
 
+ 
+        std::cout << "\nTestEncoderd :: " << OmegaString << std::endl;
 
     }
 
 
-
 }
+
+//Base encoder helper
+std::string encodeBase64(const char* input, const unsigned long inputSize) {
+    unsigned long outlen = inputSize + (inputSize / 3.0) + 16;
+    char* outbuf = new char[outlen];
+    base64_encode((unsigned char*) input, inputSize, outbuf, &outlen);
+    std::string ret((char*) outbuf, outlen);
+    delete[] outbuf;
+    return ret;
+}
+
+
+std::string GenerateOmega()
+{
+    ecc_key mykey;
+    prng_state prng;
+    int err;
+    unsigned char buf[128];
+    unsigned long y;
+    if (register_prng(&yarrow_desc) == -1) 
+    {
+        printf("Error registering Yarrow\n");
+    }
+    if ((err = rng_make_prng(128, find_prng("yarrow"), &prng, NULL))!= CRYPT_OK) 
+    {
+        printf("Error setting up PRNG, %s\n", error_to_string(err));
+    }
+    if ((err = ecc_make_key(&prng, find_prng("yarrow"), 32, &mykey)) != CRYPT_OK) 
+    {
+        printf("Error making key: %s\n", error_to_string(err));
+    }
+    y = sizeof(buf);
+    ecc_export(buf, &y, PK_PUBLIC, &mykey);
+    ecc_free(&mykey);
+    return encodeBase64((const char*) buf, y);
+ }

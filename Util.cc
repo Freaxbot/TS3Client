@@ -52,6 +52,8 @@ std::string byte_2_str_c(char* bytes, int size) {
     return str;
 }
 
+
+
 std::string byte_2_str(char* bytes, int size) {
     short iz = 0;
     std::string str;
@@ -74,3 +76,5 @@ std::string getByte(char* bytes, int index, int leng)
     std::string s(ta.begin(), ta.end());
     return s;
 }
+
+//base64
