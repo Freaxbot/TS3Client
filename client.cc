@@ -9,7 +9,7 @@
 int main(void) 
 {
     InstallTomCrypt();
-    std::cout << "TS3Client developed by Freaxbot (VerHext, Lapotor, Blocklab, Ninju)\n";
+    std::cout << "> TS3Client developed by Freaxbot\n> Licensed under the MIT license! \n";
     
         startingUDPSocket(9987, "127.0.0.1");
     

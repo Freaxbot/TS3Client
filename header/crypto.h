@@ -1,4 +1,4 @@
 #include <iostream>
 
-void InitProcess(char * byte);
+void InitProcess(char * byte, int length);
 void StartingInitProcess();

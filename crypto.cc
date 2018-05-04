@@ -1,17 +1,21 @@
 #include <iomanip>
 #include <tomcrypt.h>
 #include <tommath.h>
+#include <iostream>
+#include <string>
+#include <algorithm>
 
 #include "header/PacketHandler.h"
 #include "header/Packet.h"
 #include "header/Util.h"
 
 
-#define mp_toint(a, b) mp_toradix(a, b, 10)
+#define mp_toint(a, b) mp_toradix(a, b, 16)
 
 void InstallTomCrypt() 
 {
     ltc_mp = ltm_desc;
+    std::cout << "Libtomcrypt + Libtomath installed!" << std::endl;
 }
 
 
@@ -38,40 +42,80 @@ void StartingInitProcess()
         init.push_back(0x00);
     SendData(init, 34);
 }
+//to util
+int getHex(std::string hexstr) {
+    return (int)strtol(hexstr.c_str(), 0, 16);
+}
 
-void StartToCalculateRSA(char* xsdg, char* nfsdf )
+    //Base encoder helper
+    std::string encodeBase64(const char* input, const unsigned long inputSize) {
+        unsigned long outlen = inputSize + (inputSize / 3.0) + 16;
+        char* outbuf = new char[outlen];
+        base64_encode((unsigned char*) input, inputSize, outbuf, &outlen);
+        std::string ret((char*) outbuf, outlen);
+        delete[] outbuf;
+        return ret;
+    }
+
+void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+    if(from.empty())
+        return;
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+}
+
+    std::string CommandEncoder(std::string cmd)
+    {
+        replaceAll( cmd, "\\", "\\\\");
+        replaceAll( cmd, " ", "\\s");
+        replaceAll( cmd, "/", "\\/");
+        replaceAll( cmd, "|", "\\p");
+        replaceAll( cmd, "\b", "\\b");
+        replaceAll( cmd, "\f", "\\f");
+        replaceAll( cmd, "\n", "\\n");
+        replaceAll( cmd, "\r", "\\r");
+        replaceAll( cmd, "\t", "\\t");
+        replaceAll( cmd, "\v", "\\v");
+        return cmd;
+       
+    }
+
+    char* CommandDecoder(char* text)
+    {
+        //base32 + utf-8
+    }
+
+
+char buff[4096];
+void StartToCalculateRSA(std::string XR, std::string NR, std::string LVL )
 {
-        char buff[4096];
         mp_int x, n, X, e, Xa;
         mp_init(&x);
         mp_init(&n);
         mp_init(&X);
         mp_init(&Xa);
         mp_init(&e);
-        int level = 10000;
 
         // Calculate RSA  x ^ (2 ^ level) % n
-
-        mp_read_radix(&x, "32878006774570359216307190512414453734815024711845858985814302013359906676224571864057517441898232179839316906470039235887748992902358250854400787652810336070530280967470770997285440429053186803879037", 10);
-        mp_read_radix(&n, "77898130960070341501772069500669364440519531421534783575397763758775619778096560479521554583192022357575799725548012588149166448319424189949242058358050730052508358466295626425829884371399991831978634", 10);
+        mp_read_radix(&x, XR.c_str(), 16);
+        mp_read_radix(&n, NR.c_str(), 16);
         mp_set(&e, 2);
-
-        mp_expt_d_ex(&e, level , &Xa, 1);
+        mp_expt_d_ex(&e, getHex(LVL) , &Xa, 1);
         mp_exptmod(&x, &Xa, &n, &X);
-
         mp_toint(&X, buff);
         printf("RSA :: %s\n", buff);
-
         mp_clear(&x);
         mp_clear(&n);
         mp_clear(&X);
         mp_clear(&Xa);
-        mp_clear(&e);
-
+        mp_clear(&e); 
 }
 
 
-void InitProcess(char * byte)
+void InitProcess(char* byte, int length)
 {
     //[1]
     if (getByte(byte, 12, 32) == "10")
@@ -90,44 +134,55 @@ void InitProcess(char * byte)
     //[3]
     if (getByte(byte, 12, 32) == "30")
     {
+        std::string oldBuf = byte_2_str(byte, length);
+        //declaraion of the working vars.
+        char vX[64], vN[64], vL[4], a2[100], y[64];
+       
+        memcpy(vX, &byte[12], 64);
+        memcpy(vN, &byte[12 + 64], 64);
+        memcpy(vL, &byte[12 + 64 + 64], 4);
+        memcpy(a2, &byte[12 + 64 + 64 + 4], 100);
+        memcpy(y, buff, 64);
+        std::cout << "X :: " << byte_2_str(vX, 64) << std::endl;
+        std::cout << "N :: " << byte_2_str(vN, 64) << std::endl;
+        std::cout << "LVL :: " << byte_2_str_c(vL, 4) << std::endl;
+        std::cout << "Y :: " << byte_2_str_c(y, 64) << std::endl;
+        StartToCalculateRSA(byte_2_str(vX, 64), byte_2_str(vN, 64), byte_2_str(vL, 4));
+        std::string xCommand = "clientinitiv alpha="+encodeBase64("hsddikgrt0", 10)+" omega=" + GenerateOmega() + " ip=127.0.0.1";
+        
+        std::cout << "FinishCMD " << CommandEncoder(xCommand) << std::endl;
 
-     std::cout << sizeof(byte) << std::endl;
-        std::vector<unsigned char> init1 = BuildHeader(0x88);
+    int lCmd = CommandEncoder(xCommand).length();
+   char* cmdBuf = strdup(CommandEncoder(xCommand).c_str());
+
+        std::vector<unsigned char> init2 = BuildHeader(0x88);
         int version[5] = { 0x09, 0x83, 0x8c, 0xCF, 0x04 };
         for (int i = 0; i < 5; i++)
-            init1.push_back(version[i]);
+            init2.push_back(version[i]);
         for (int i = 0; i < 64; i++)
-            init1.push_back(byte[i + 12]);
+            init2.push_back(vX[i]);
         for (int i = 0; i < 64; i++)
-            init1.push_back(byte[i + 12 + 64]);
+            init2.push_back(vN[i]);
         for (int i = 0; i < 4; i++)
-            init1.push_back(byte[i + 12 + 64 + 64]);
+            init2.push_back(vL[i]);
+        for (int i = 0; i < 100; i++)
+            init2.push_back(a2[i]);
 
-  
-        std::cout << getByte(byte, 250, 32) << std::endl;
-       std::string OmegaString = GenerateOmega();
-
-        std::cout << "CODE :: "<< byte_2_str_c(reinterpret_cast<char*>(init1.data()), sizeof(init1)) << std::endl;
-
- 
-        std::cout << "\nTestEncoderd :: " << OmegaString << std::endl;
+        for (int i = 0; i < 64; i++)
+            init2.push_back(y[i]);
+        for (int i = 0; i < lCmd; i++)
+            init2.push_back(cmdBuf[i]);
+std::cout << "IntL " << lCmd << std::endl;
+    SendData(init2, 361 + lCmd);
+    
 
     }
-
-
-}
-
-//Base encoder helper
-std::string encodeBase64(const char* input, const unsigned long inputSize) {
-    unsigned long outlen = inputSize + (inputSize / 3.0) + 16;
-    char* outbuf = new char[outlen];
-    base64_encode((unsigned char*) input, inputSize, outbuf, &outlen);
-    std::string ret((char*) outbuf, outlen);
-    delete[] outbuf;
-    return ret;
 }
 
 
+
+
+//Genarate the Identity ecc_key for the server...
 std::string GenerateOmega()
 {
     ecc_key mykey;
@@ -152,3 +207,7 @@ std::string GenerateOmega()
     ecc_free(&mykey);
     return encodeBase64((const char*) buf, y);
  }
+
+/*
+
+*/

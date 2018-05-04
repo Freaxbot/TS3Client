@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -30,6 +31,8 @@ std::vector<unsigned char> BuildHeader(char packettype)
     return h;
 }
 
+
+
 void GetPacket(char* data, int lengh)
 {
     std::string  type = getByte(data, 11, lengh);
@@ -37,7 +40,7 @@ void GetPacket(char* data, int lengh)
     if (type == "88") 
     {
         std::cout << "Package INIT1" << std::endl;
-        InitProcess(data);
+        InitProcess(data, lengh);
     }
     
 
