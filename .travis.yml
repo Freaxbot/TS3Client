@@ -20,4 +20,4 @@ install:
 
 # Build steps
 script:
-  - make -f make main
+  - sudo make -f make main
