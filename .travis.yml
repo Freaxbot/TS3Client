@@ -18,7 +18,7 @@ install:
   - cd ..
   - sudo git clone https://github.com/libtom/libtomcrypt
   - cd libtomcrypt
-  - sudo make CFLAGS="-DUSE_LTM -DLTM_DESC" EXTRALIBS="-ltommath" install
+  - make CFLAGS="-DUSE_LTM -DLTM_DESC" EXTRALIBS="-ltommath" install
   - cd ..
 
 # Build steps
