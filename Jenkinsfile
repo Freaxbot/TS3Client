@@ -10,7 +10,6 @@ pipeline {
               image 'ubuntu:16.04'
               reuseNode false
             }
-
           }
           steps {
             echo 'TS3Client Pipeline'
@@ -24,11 +23,10 @@ pipeline {
         }
         stage('Windows') {
           agent {
-            docker {
-              image 'microsoft/windowsservercore'
+            node {
+              label 'Windows
               reuseNode false
             }
-
           }
           steps {
             echo 'Un Used'
