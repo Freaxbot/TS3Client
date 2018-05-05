@@ -20,6 +20,7 @@ install:
   - cd libtomcrypt
   - sudo make CFLAGS="-DUSE_LTM -DLTM_DESC" EXTRALIBS="-ltommath" install
   - cd ..
+  - ls
   - cd Freaxbot/TS3Client
 
 # Build steps
