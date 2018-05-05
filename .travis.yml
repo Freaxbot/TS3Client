@@ -16,7 +16,7 @@ install:
   - sudo cp -a libtom-lib/lib/. /usr/local/lib/
   - sudo cp -a libtom-lib/include/. /usr/local/include/
   - sudo git clone https://github.com/Freaxbot/TS3Client
-  - sudo cd TS3Client/
+  - cd TS3Client/
 
 # Build steps
 script:
