@@ -12,11 +12,11 @@ compiler:
   - gcc
   
 install:
-  - git clone https://github.com/VerHext/libtom-lib
-  - cp -a libtom-lib/lib/. /usr/local/lib/
-  - cp -a libtom-lib/include/. /usr/local/include/
-  - git clone https://github.com/Freaxbot/TS3Client
-  - cd TS3Client/
+  - sudo git clone https://github.com/VerHext/libtom-lib
+  - sudo cp -a libtom-lib/lib/. /usr/local/lib/
+  - sudo cp -a libtom-lib/include/. /usr/local/include/
+  - sudo git clone https://github.com/Freaxbot/TS3Client
+  - sudo cd TS3Client/
 
 # Build steps
 script:
