@@ -25,7 +25,6 @@ pipeline {
           agent {
             node {
               label 'Windows'
-              reuseNode false
             }
           }
           steps {
