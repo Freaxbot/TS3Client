@@ -18,7 +18,7 @@ install:
   - cd ..
   - sudo git clone https://github.com/libtom/libtomcrypt
   - cd libtomcrypt
-  - make CFLAGS="-DUSE_LTM -DLTM_DESC" EXTRALIBS="-ltommath" install
+  - sudo make CFLAGS="-DUSE_LTM -DLTM_DESC" EXTRALIBS="-ltommath" install
   - cd ..
   - cd TS3Client
 
