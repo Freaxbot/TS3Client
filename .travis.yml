@@ -12,12 +12,15 @@ compiler:
   - gcc
   
 install:
-  - git clone https://github.com/VerHext/libtom-lib
-  - cp -a libtom-lib/lib/. /usr/local/lib/
-  - cp -a libtom-lib/include/. /usr/local/include/
-  - git clone https://github.com/Freaxbot/TS3Client
-  - cd TS3Client/
+  - sudo git clone https://github.com/libtom/libtommath
+  - cd libtommath
+  - sudo make install
+  - cd ..
+  - sudo git clone https://github.com/libtom/libtomcrypt
+  - cd libtomcrypt
+  - sudo make CFLAGS="-DUSE_LTM -DLTM_DESC" EXTRALIBS="-ltommath" install
+  - cd ..
 
 # Build steps
 script:
-  - make -f make main
+  - sudo make -f make main
