@@ -24,7 +24,7 @@ pipeline {
         stage('Windows') {
           agent {
             node {
-              label 'Windows
+              label 'Windows'
               reuseNode false
             }
           }
