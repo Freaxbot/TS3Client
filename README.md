@@ -27,6 +27,13 @@ Implementation of the TS3 client in C++
 - [@Lapotor](https://github.com/lapotor) help with great stuff
 - [@Freaxbot](https://github.com/freaxbot) 
 
+## Platform compatibility
+
+| Linux x64 | Windows x64 | Mac OS(x64) |
+| --- | --- | --- |
+| :heavy_check_mark: | :heavy_multiplication_x: | :heavy_multiplication_x: |
+
+
 # Other TS3Client lib's
 [![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://github.com/syncu2/PyTS3Bot) 
 
