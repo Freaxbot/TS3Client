@@ -3,7 +3,11 @@
 #include <tommath.h>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <algorithm>
+
+//Debug
+#include <typeinfo>
 
 #include "header/PacketHandler.h"
 #include "header/Packet.h"
@@ -11,6 +15,7 @@
 
 
 #define mp_toint(a, b) mp_toradix(a, b, 16)
+#define mp_tointTest(a, b) mp_toradix(a, b, 10)
 
 void InstallTomCrypt() 
 {
@@ -89,9 +94,10 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
     }
 
 
-char buff[4096];
-void StartToCalculateRSA(std::string XR, std::string NR, std::string LVL )
+
+char* StartToCalculateRSA(std::string XR, std::string NR, std::string LVL )
 {
+        static char buff[4096];
         mp_int x, n, X, e, Xa;
         mp_init(&x);
         mp_init(&n);
@@ -111,7 +117,8 @@ void StartToCalculateRSA(std::string XR, std::string NR, std::string LVL )
         mp_clear(&n);
         mp_clear(&X);
         mp_clear(&Xa);
-        mp_clear(&e); 
+        mp_clear(&e);
+        return buff;
 }
 
 
@@ -136,25 +143,26 @@ void InitProcess(char* byte, int length)
     {
         std::string oldBuf = byte_2_str(byte, length);
         //declaraion of the working vars.
-        char vX[64], vN[64], vL[4], a2[100], y[64];
+        char vX[64], vN[64], vL[4], a2[100];
        
         memcpy(vX, &byte[12], 64);
         memcpy(vN, &byte[12 + 64], 64);
         memcpy(vL, &byte[12 + 64 + 64], 4);
         memcpy(a2, &byte[12 + 64 + 64 + 4], 100);
-        memcpy(y, buff, 64);
+    
+        auto y = StartToCalculateRSA(byte_2_str(vX, 64), byte_2_str(vN, 64), byte_2_str(vL, 4));
+    
         std::cout << "X :: " << byte_2_str(vX, 64) << std::endl;
         std::cout << "N :: " << byte_2_str(vN, 64) << std::endl;
         std::cout << "LVL :: " << byte_2_str_c(vL, 4) << std::endl;
-        std::cout << "Y :: " << byte_2_str_c(y, 64) << std::endl;
-        StartToCalculateRSA(byte_2_str(vX, 64), byte_2_str(vN, 64), byte_2_str(vL, 4));
-        std::string xCommand = "clientinitiv alpha="+encodeBase64("hsddikgrt0", 10)+" omega=" + GenerateOmega() + " ip=127.0.0.1";
-        
-        std::cout << "FinishCMD " << CommandEncoder(xCommand) << std::endl;
+        std::cout << "YRAW :: " << y << std::endl;
+        std::string xCommand = "clientinitiv alpha="+encodeBase64("hsidikgrt0", 10)+" omega=" + GenerateOmega() + " ot=1 ip=";
 
-    int lCmd = CommandEncoder(xCommand).length();
-   char* cmdBuf = strdup(CommandEncoder(xCommand).c_str());
+        int lCmd = xCommand.length();
+        char* cmdBuf = strdup(xCommand.c_str());
 
+        int int5 = 0;
+        int i_auto;
         std::vector<unsigned char> init2 = BuildHeader(0x88);
         int version[5] = { 0x09, 0x83, 0x8c, 0xCF, 0x04 };
         for (int i = 0; i < 5; i++)
@@ -167,15 +175,18 @@ void InitProcess(char* byte, int length)
             init2.push_back(vL[i]);
         for (int i = 0; i < 100; i++)
             init2.push_back(a2[i]);
-
         for (int i = 0; i < 64; i++)
-            init2.push_back(y[i]);
+        {
+            std::stringstream ss;
+            ss<< "0x" <<  y[int5] << y[int5 + 1];
+            std::string res ( ss.str() );
+            i_auto = std::stoi (res,nullptr,0);
+            init2.push_back(i_auto);
+            int5 = int5 + 2;
+        }
         for (int i = 0; i < lCmd; i++)
             init2.push_back(cmdBuf[i]);
-std::cout << "IntL " << lCmd << std::endl;
-    SendData(init2, 361 + lCmd);
-    
-
+        SendData(init2, 314 + lCmd);
     }
 }
 
