@@ -29,6 +29,57 @@ void IncommingPacket(char* data)
 
 }
 
+
+std::string TS3InitMac = "TS3INIT1";
+
+//Decrypt <3
+void Decrypt(char* byte, int length)
+{
+   unsigned char Header[30], Data[4069], Mac[80];
+       
+        memcpy(Header, &byte[8], 3);
+        memcpy(Mac, &byte[0], 8);
+        memcpy(Data, &byte[8 + 3], length - 8 - 3);
+
+      // std::cout << "Header :: " << byte_2_str(Header, 3) << std::endl;
+        std::cout << "Mac :: " << byte_2_str((char*)Mac, 8) << std::endl;
+        std::cout << "Data :: " << byte_2_str_c((char*)Data, length - 8 - 3) << std::endl;
+
+        int err;
+        eax_state eax;
+        unsigned char pt[64], ct[64], tag[16];
+
+        unsigned char nonce[16] = {0x6D, 0x5C, 0x66, 0x69, 0x72, 0x65, 0x77, 0x61, 0x6C, 0x6C, 0x33, 0x32, 0x2E, 0x63, 0x70, 0x6C};
+        unsigned char key[16] = {0x63, 0x3A, 0x5C, 0x77, 0x69, 0x6E, 0x64, 0x6F, 0x77, 0x73, 0x5C, 0x73, 0x79, 0x73, 0x74, 0x65};
+
+
+        if (register_cipher(&rijndael_desc) == -1) {
+            printf("Error registering Rijndael");
+            return;
+        }
+
+       if ((err = eax_init( &eax, /* context */
+            find_cipher("rijndael"), /* cipher id */
+            key,
+            16,
+            nonce, /* the nonce */
+            16, /* nonce is 16 bytes */
+            Mac, /* example header */
+            8) /* header length */
+            ) != CRYPT_OK) {
+            printf("Error eax_init: %s", error_to_string(err));
+            return;
+        }
+
+        eax_decrypt( &eax, reinterpret_cast<unsigned char*>(Data), ct,  sizeof(Data));
+        std::cout << "Encrypt byte :: " << byte_2_str_c(reinterpret_cast<char*>(ct), sizeof(ct)) << std::endl;
+        std::cout << "Encrypt text :: " << ct << std::endl;
+    
+
+
+
+}
+
 std::string GenerateOmega();
 
 // ========== TS3INIT ==========

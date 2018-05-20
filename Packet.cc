@@ -42,6 +42,12 @@ void GetPacket(char* data, int lengh)
         std::cout << "Package INIT1" << std::endl;
         InitProcess(data, lengh);
     }
+
+    if (type == "20")
+    {
+        std::cout << "[CMD]" << std::endl;
+        Decrypt(data, lengh);   
+    }
     
 
 }
