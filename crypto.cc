@@ -116,6 +116,9 @@ unsigned char* Encrypt(char* data, int length, short type)
     char Ptype[1];
     Ptype[0] = pTypeInt & 255;
 
+    unsigned char packetID[2] = {0x00, 0x00};
+
+
 //Build encrypt Header 
  //int MAC2[8] = {0xA4, 0x7B, 0x47, 0x94, 0xDB, 0xA9, 0x6A, 0xC5};
 
@@ -123,7 +126,7 @@ unsigned char* Encrypt(char* data, int length, short type)
   
 
     char* header[5];
-    memcpy(header, &GetPacketId(), 2);
+    memcpy(header, &packetID, 2);
     memcpy(header, &CIDC, 2);
     memcpy(header, reinterpret_cast<char*>(Ptype), 1);
    
