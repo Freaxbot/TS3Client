@@ -65,14 +65,15 @@ void SendData(std::vector<uint8_t> buff, int leng) {
 
 void FetchData()
 {
-
+int size_recv , total_size= 0;
     std::cout << "Starting to fetch message ... " << std::endl;
+    int recv_len;
     while (1)
     {
         memset(buf,'\0', BUFLEN);
-        recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, reinterpret_cast<socklen_t *>(&slen));
-        std::cout << "[IN] :: "<< byte_2_str_c(reinterpret_cast<char*>(buf), sizeof(buf)) << std::endl;
-        GetPacket(buf, sizeof(buf));
+        recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, reinterpret_cast<socklen_t *>(&slen));
+        std::cout << "[IN] :: "<< byte_2_str_c(reinterpret_cast<char*>(buf), recv_len) << std::endl;
+        GetPacket(buf, recv_len);
     }
 }
  

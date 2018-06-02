@@ -46,7 +46,12 @@ void GetPacket(char* data, int lengh)
     if (type == "20")
     {
         std::cout << "[CMD]" << std::endl;
-        Decrypt(data, lengh);   
+        Decrypt(data, lengh); 
+        char PId[2];
+        memcpy(PId, &data[8], 2);
+
+        Encrypt(PId, 2, 6);
+          
     }
     
 

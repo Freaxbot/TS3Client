@@ -17,10 +17,23 @@
 #define mp_toint(a, b) mp_toradix(a, b, 16)
 #define mp_tointTest(a, b) mp_toradix(a, b, 10)
 
+void InitCrypto();
+
+static short InitFinish = 0;
+static short IsConnected = 0;
+static long unsigned int taglength = 8;
+static int packetid = 0;
+static char PIDC[2];
+static char* CIDC = "0001";
+
+
+
+
 void InstallTomCrypt() 
 {
     ltc_mp = ltm_desc;
     std::cout << "Libtomcrypt + Libtomath installed!" << std::endl;
+    InitCrypto();
 }
 
 
@@ -28,55 +41,120 @@ void IncommingPacket(char* data)
 {
 
 }
+    unsigned char nonceD[16] = {0x6D, 0x5C, 0x66, 0x69, 0x72, 0x65, 0x77, 0x61, 0x6C, 0x6C, 0x33, 0x32, 0x2E, 0x63, 0x70, 0x6C};
+    unsigned char keyD[16] = {0x63, 0x3A, 0x5C, 0x77, 0x69, 0x6E, 0x64, 0x6F, 0x77, 0x73, 0x5C, 0x73, 0x79, 0x73, 0x74, 0x65};
+    unsigned char key[16], nonce[16];
+
+static eax_state eax;
+
+void InitCrypto()
+{
+    if (register_cipher(&rijndael_desc) == -1) {
+        printf("Error registering Rijndael");
+        return;
+    }
+}
+
+char* GetPacketId()
+{
+
+    if (packetid >= 65535)
+    {
+        printf("[ERROR] Overflow PacketId counter higher (max 65535) \n");
+        return NULL;
+    }
+    PIDC[1] = packetid & 255;
+    PIDC[0] = (packetid >> 8) & 255;
+    std::cout << "[PacketID] :: "  <<byte_2_str_c(reinterpret_cast<char*>(PIDC), sizeof(PIDC)) << std::endl;
+    packetid++;
+    return PIDC;
+}
 
 
-std::string TS3InitMac = "TS3INIT1";
 
-//Decrypt <3
 void Decrypt(char* byte, int length)
 {
-   unsigned char Header[30], Data[4069], Mac[80];
-       
-        memcpy(Header, &byte[8], 3);
-        memcpy(Mac, &byte[0], 8);
-        memcpy(Data, &byte[8 + 3], length - 8 - 3);
-
-      // std::cout << "Header :: " << byte_2_str(Header, 3) << std::endl;
-        std::cout << "Mac :: " << byte_2_str((char*)Mac, 8) << std::endl;
-        std::cout << "Data :: " << byte_2_str_c((char*)Data, length - 8 - 3) << std::endl;
-
-        int err;
-        eax_state eax;
-        unsigned char pt[64], ct[64], tag[16];
-
-        unsigned char nonce[16] = {0x6D, 0x5C, 0x66, 0x69, 0x72, 0x65, 0x77, 0x61, 0x6C, 0x6C, 0x33, 0x32, 0x2E, 0x63, 0x70, 0x6C};
-        unsigned char key[16] = {0x63, 0x3A, 0x5C, 0x77, 0x69, 0x6E, 0x64, 0x6F, 0x77, 0x73, 0x5C, 0x73, 0x79, 0x73, 0x74, 0x65};
+    int dataLen = length-11;
+    int macLen = 8;
+    int state = 2;
 
 
-        if (register_cipher(&rijndael_desc) == -1) {
-            printf("Error registering Rijndael");
-            return;
-        }
-
-       if ((err = eax_init( &eax, /* context */
-            find_cipher("rijndael"), /* cipher id */
-            key,
-            16,
-            nonce, /* the nonce */
-            16, /* nonce is 16 bytes */
-            Mac, /* example header */
-            8) /* header length */
-            ) != CRYPT_OK) {
-            printf("Error eax_init: %s", error_to_string(err));
-            return;
-        }
-
-        eax_decrypt( &eax, reinterpret_cast<unsigned char*>(Data), ct,  sizeof(Data));
-        std::cout << "Encrypt byte :: " << byte_2_str_c(reinterpret_cast<char*>(ct), sizeof(ct)) << std::endl;
-        std::cout << "Encrypt text :: " << ct << std::endl;
+    std::cout << "lhjkL::: " << length << std::endl;
     
+    unsigned char pt[dataLen + macLen -18];
+    unsigned char header[3], mac[8], data[dataLen];
+    memcpy(header, &byte[8], 3);
+    memcpy(mac, &byte[0], 8);
+    memcpy(data, &byte[11], length-11);
+    if (InitFinish == 0){
+
+        eax_decrypt_verify_memory(
+            find_cipher("rijndael"),
+            keyD, 16,
+            nonceD, 16,
+            reinterpret_cast<unsigned char*>(header), 3,
+            reinterpret_cast<unsigned char*>(data), dataLen,
+            pt, reinterpret_cast<unsigned char*>(mac), 8, &state
+        );
+
+        std::cout << "[ENCODER] :: "<< byte_2_str_c(reinterpret_cast<char*>(pt), sizeof(pt)) << std::endl;
+
+        std::cout << "State :: " << state << std::endl;
+        std::cout << "PlainText :: " << pt << std::endl;
+
+    }else{
+        //ToDo
+    }
+
+}
 
 
+unsigned char* Encrypt(char* data, int length, short type)
+{  
+  
+    int pTypeInt = 0 << type;
+    char Ptype[1];
+    Ptype[0] = pTypeInt & 255;
+
+//Build encrypt Header 
+ //int MAC2[8] = {0xA4, 0x7B, 0x47, 0x94, 0xDB, 0xA9, 0x6A, 0xC5};
+
+  unsigned char ct[64], tag[8];
+  
+
+    char* header[5];
+    memcpy(header, &GetPacketId(), 2);
+    memcpy(header, &CIDC, 2);
+    memcpy(header, reinterpret_cast<char*>(Ptype), 1);
+   
+    unsigned char nonce[16] = {0x6D, 0x5C, 0x66, 0x69, 0x72, 0x65, 0x77, 0x61, 0x6C, 0x6C, 0x33, 0x32, 0x2E, 0x63, 0x70, 0x6C};
+    unsigned char key[16] = {0x63, 0x3A, 0x5C, 0x77, 0x69, 0x6E, 0x64, 0x6F, 0x77, 0x73, 0x5C, 0x73, 0x79, 0x73, 0x74, 0x65};
+
+    eax_encrypt_authenticate_memory(
+        find_cipher("rijndael"),
+        key, 16,
+        nonce, 16,
+        reinterpret_cast<unsigned char*>(header), 5,
+        reinterpret_cast<unsigned char*>(data), length,
+        ct, tag, &taglength  );
+
+        std::cout << "Ack byte :: " << byte_2_str_c(reinterpret_cast<char*>(ct), 2) << std::endl;
+        std::cout << "Mac byte :: " << byte_2_str_c(reinterpret_cast<char*>(tag), 8) << std::endl;
+        std::cout << "Header byte :: " << byte_2_str_c(reinterpret_cast<char*>(header), 5) << std::endl;
+
+     std::vector<unsigned char> outH;
+
+    for(int i = 0; i < 8; i++){
+        outH.push_back(tag[i]);
+    }  
+    for(int i = 0; i < 5; i++){
+        outH.push_back(reinterpret_cast<unsigned char*>(header)[i]);
+    }             
+    for(int i = 0; i < 2; i++){
+        outH.push_back(ct[i]);
+    }     
+
+       SendData(outH, 15);
 
 }
 
@@ -98,7 +176,7 @@ void StartingInitProcess()
         init.push_back(0x00);
     SendData(init, 34);
 }
-//to util
+//ToDo to util
 int getHex(std::string hexstr) {
     return (int)strtol(hexstr.c_str(), 0, 16);
 }
@@ -209,6 +287,8 @@ void InitProcess(char* byte, int length)
         std::cout << "YRAW :: " << y << std::endl;
         std::string xCommand = "clientinitiv alpha="+encodeBase64("hsidikgrt0", 10)+" omega=" + GenerateOmega() + " ot=1 ip=";
 
+        std::cout <<xCommand << std::endl;
+
         int lCmd = xCommand.length();
         char* cmdBuf = strdup(xCommand.c_str());
 
@@ -250,8 +330,8 @@ std::string GenerateOmega()
     ecc_key mykey;
     prng_state prng;
     int err;
-    unsigned char buf[128];
-    unsigned long y;
+    unsigned char buf[128], buff_p[128];
+    unsigned long y, x;
     if (register_prng(&yarrow_desc) == -1) 
     {
         printf("Error registering Yarrow\n");
@@ -265,8 +345,11 @@ std::string GenerateOmega()
         printf("Error making key: %s\n", error_to_string(err));
     }
     y = sizeof(buf);
+    x = sizeof(buff_p);
     ecc_export(buf, &y, PK_PUBLIC, &mykey);
+    ecc_export(buff_p, &x, PK_PRIVATE, &mykey);
     ecc_free(&mykey);
+    std::cout << "Private Key :: " << encodeBase64((const char*) buff_p, x) << std::endl;
     return encodeBase64((const char*) buf, y);
  }
 
