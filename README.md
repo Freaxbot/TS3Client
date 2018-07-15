@@ -1,4 +1,4 @@
-#Warum ist dieses Repo archiviert?
+# Warum ist dieses Repo archiviert?
 
 Wir haben TeamSpeak seit anfang an verfolgt und standen immer hinter der Voice software. Nun ab heute sehen wir leider keinen Sinn mehr darinn. Durch die Einführung der unrelastischen Lizenz Preise (Gamer License) ist TeamSpeak unatrraktiv geworden. Und wir werden keine weitere Zeit in diese Software investieren. Außer TeamSpeak kommt endlich zur Vernunft kommt. Unser TeamSpeak server haben wir geschloßen und die Entwicklung eingestellt. 
 
